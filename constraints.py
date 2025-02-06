@@ -4,10 +4,20 @@ from optapy import constraint_provider, get_class
 from optapy.constraint import Joiners
 from optapy.score import HardSoftScore
 from optapy.constraint import ConstraintFactory
+from datetime import date
+from datetime import time, datetime, timedelta
 
 
 DivisionClass = get_class(Division)
 LectureClass = get_class(Lecture)
+
+today = date.today()
+
+
+def within_30_minutes(lesson1: Lecture, lesson2: Lecture):
+    between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
+    return timedelta(minutes=0) == between
+
 
 def room_conflict(constraint_factory: ConstraintFactory):
     # LECTURE(self, id, room, teacher, subject, timeslot=None, division=None)
@@ -45,12 +55,13 @@ def class_conflict(constraint_factory: ConstraintFactory):
   
 def same_classes_together(constraint_factory: ConstraintFactory):
     a = constraint_factory. \
-        for_each(Lecture). \
-            join(Lecture, 
-                    #  Joiners.equal(lambda l: l.subject),
-                     Joiners.equal(lambda l: l.timeslot.day_of_week),
-                     Joiners.less_than(lambda l: l.id),
-                 ).filter(lambda a,b: check_time(a,b) and a.subject!=b.subject) \
+        for_each(LectureClass). \
+            join(LectureClass, 
+                    Joiners.equal(lambda l: l.division),
+                    Joiners.equal(lambda l: l.timeslot.day_of_week),
+                    Joiners.less_than(lambda l: l.id),
+                    Joiners.filtering(lambda a, b: within_30_minutes(a,b) and a.subject!=b.subject)
+                 ) \
                      .penalize("same classes together", HardSoftScore.ONE_HARD)
     return a   
 

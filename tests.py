@@ -40,7 +40,7 @@ def test_teacher_conflict():
         
 def test_same_classes_conflict():
     first_lesson = Lecture(1, "Room1", "Teacher A", "DE", T1, DIV1)
-    conflicting_lesson = Lecture(2, "Room1", "Teacher B", "DE", T3, DIV1)
+    conflicting_lesson = Lecture(2, "Room1", "Teacher B", "PS", T2, DIV1)
     nonconflicting_lesson = Lecture(3, "Room1", "Teacher A", "DE", T2, DIV1)
     cv.verify_that(same_classes_together).given(first_lesson, conflicting_lesson, nonconflicting_lesson). \
         penalizes_by(1)
