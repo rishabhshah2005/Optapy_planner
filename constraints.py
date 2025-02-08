@@ -124,7 +124,13 @@ def remove_overlapping_lectures(constraint_factory: ConstraintFactory):
                     Joiners.equal(lambda l1: l1.room),
                     Joiners.equal(lambda l1: l1.timeslot)
                     ).filter(lambda l1, l2: l1.id!=l2.id).penalize("overlapping", HardSoftScore.ofHard(2))
-    
+    return a
+
+def cant_have_more_than_2_lectures(constraint_factory: ConstraintFactory):
+    a = constraint_factory.for_each(LectureClass).\
+        group_by(lambda l1: (l1.timeslot.day_of_week, l1.subject, l1.division), ConstraintCollectors.count()).\
+            filter(lambda key,cnt: cnt>2).\
+                penalize("cant have more than two lectures", HardSoftScore.ONE_HARD)
     return a
 
 @constraint_provider
@@ -139,5 +145,6 @@ def define_constraints(constraint_factory: ConstraintFactory):
         teachers_prefer_less_lectures(constraint_factory),
         lecture_lab_room_conflict(constraint_factory),
         remove_overlapping_lectures(constraint_factory),
+        cant_have_more_than_2_lectures(constraint_factory),
     ]
     

@@ -142,5 +142,36 @@ def test_remove_overlapping_lectures():
     cv.verify_that(remove_overlapping_lectures).given(first_lesson, nonconflicting_lesson, conflicting_lesson). \
         penalizes(1)
 
+def test_cant_have_more_than_2_lectures():
+    valid_lectures = [
+        Lecture(1,"Teacher A", "DE", DIV1, R1, T1),
+        Lecture(2,"Teacher A", "DE", DIV2, R2, T2),
+        Lecture(3,"Teacher A", "PS", DIV1, R1, T3),
+        Lecture(4,"Teacher A", "PS", DIV1, R1, T4),
+    ]
+    invalid_lectures2 = [
+        Lecture(1,"Teacher A", "DE", DIV2, R1, T1),
+        Lecture(2,"Teacher A", "DE", DIV2, R2, T2),
+        Lecture(3,"Teacher A", "DE", DIV2, R2, T3),
+        Lecture(4,"Teacher A", "DE", DIV2, R2, T4),
+    ]
+    valid_lectures2 = [
+        Lecture(1,"Teacher A", "DE", DIV1, R1, T1),
+        Lecture(2,"Teacher A", "PS", DIV2, R2, T2),
+        Lecture(3,"Teacher A", "FSD", DIV1, R1, T3),
+        Lecture(4,"Teacher A", "FSD", DIV1, R1, T4),
+    ]
+
+ 
+    # Verify that the correct cases are rewarded
+    cv.verify_that(cant_have_more_than_2_lectures) \
+        .given(*valid_lectures) \
+        .penalizes(0)  
+    cv.verify_that(cant_have_more_than_2_lectures) \
+        .given(*valid_lectures2) \
+        .penalizes(0) 
+    cv.verify_that(cant_have_more_than_2_lectures) \
+        .given(*invalid_lectures2) \
+        .penalizes(1) 
 
 # C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe -m pytest tests.py

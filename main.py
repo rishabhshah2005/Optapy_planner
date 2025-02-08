@@ -20,8 +20,3 @@ solution = solver.solve(generate_problem())
 
 print(solution)
 
-for i in range(len(solution)):
-    for j in range(i,len(solution)):
-        if isOverlapping(i, j):
-            print(i)
-            print(j)
