@@ -75,9 +75,18 @@ def four_lectures_per_day(constraint_factory: ConstraintFactory):
     return (constraint_factory.for_each(Lecture)
                               .group_by(lambda lecture: (lecture.timeslot.day_of_week, lecture.division),  # group into lectures on the same day
                                         ConstraintCollectors.count())  # count lectures in the group
-                              .filter(lambda day_of_week, count: count != 4)
+                              .filter(lambda day_of_week, count: count < 4)
                               .penalize("four lectures per day", HardSoftScore.ONE_HARD)
     )
+    
+# Lab subjects should be taught in a Lab and Room subjects should be taught in a room
+def lecture_lab_room_conflict(constraint_factory: ConstraintFactory):
+    a = constraint_factory.for_each(LectureClass).\
+        filter(lambda l1: (l1.room.name.startswith("Lab") and (l1.subject not in lab_lectures)) or
+                      (l1.room.name.startswith("Room") and (l1.subject not in room_lectures))).\
+                penalize("lab lab room room", HardSoftScore.ONE_HARD)
+    
+    return a
 
 # Try to have consecutive classes of same subject
 def same_rooms_together(constraint_factory: ConstraintFactory):
@@ -124,14 +133,6 @@ def teachers_prefer_less_lectures(constraint_factory: ConstraintFactory):
                 reward("less lectures are preferred by teachers", HardSoftScore.ofSoft(1))
     return a
 
-# Lab subjects should be taught in a Lab and Room subjects should be taught in a room
-def lecture_lab_room_conflict(constraint_factory: ConstraintFactory):
-    a = constraint_factory.for_each(LectureClass).\
-        filter(lambda l1: (l1.room.name.startswith("Lab") and (l1.subject not in lab_lectures)) or
-                      (l1.room.name.startswith("Room") and (l1.subject not in room_lectures))).\
-                penalize("lab lab room room", HardSoftScore.ONE_HARD)
-    
-    return a
 
 def remove_overlapping_lectures(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each_unique_pair(LectureClass,
@@ -147,7 +148,7 @@ def cant_have_more_than_2_lectures(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each(LectureClass).\
         group_by(lambda l1: (l1.timeslot.day_of_week, l1.subject, l1.division), ConstraintCollectors.count()).\
             filter(lambda key,cnt: cnt>2).\
-                penalize("cant have more than two lectures", HardSoftScore.ONE_HARD)
+                penalize("cant have more than two lectures", HardSoftScore.ONE_SOFT)
     return a
 
 def same_labs_throughout(constraint_factory: ConstraintFactory):
@@ -156,7 +157,7 @@ def same_labs_throughout(constraint_factory: ConstraintFactory):
             filter(lambda key,cnt: key[0].name.startswith("Lab")).\
                 group_by(lambda key,cnt: key[1], ConstraintCollectors.count_bi()).\
                     filter(lambda x,cnt: cnt>1).\
-                        penalize("labs of divisions should remain same", HardSoftScore.ONE_HARD)
+                        penalize("labs of divisions should remain same", HardSoftScore.ONE_SOFT)
     return a
 
 @constraint_provider

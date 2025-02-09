@@ -268,6 +268,31 @@ def generate_problem():
         Lecture(71, "PKS", "PS", "A3"),
         Lecture(72, "UMS", "DE", "A3"),
         
+        # Lecture(73, "PHA", "FSD", "A4"),
+        # Lecture(74, "AAP", "Python", "A4"),
+        # Lecture(75, "SAS", "PS", "A4"),
+        # Lecture(76, "UMM", "DE", "A4"),
+        # Lecture(77, "PHA", "FSD", "A4"),
+        # Lecture(78, "AAP", "Python", "A4"),
+        # Lecture(79, "SAS", "PS", "A4"),
+        # Lecture(80, "UMM", "DE", "A4"),
+        # Lecture(81, "PHA", "FSD", "A4"),
+        # Lecture(82, "AAP", "Python", "A4"),
+        # Lecture(83, "SAS", "PS", "A4"),
+        # Lecture(84, "UMM", "DE", "A4"),
+        # Lecture(85, "PHA", "FSD", "A4"),
+        # Lecture(86, "AAP", "Python", "A4"),
+        # Lecture(87, "SAS", "PS", "A4"),
+        # Lecture(88, "UMM", "DE", "A4"),
+        # Lecture(89, "PHA", "FSD", "A4"),
+        # Lecture(90, "AAP", "Python", "A4"),
+        # Lecture(91, "SAS", "PS", "A4"),
+        # Lecture(92, "UMM", "DE", "A4"),
+        # Lecture(93, "PHA", "FSD", "A4"),
+        # Lecture(94, "AAP", "Python", "A4"),
+        # Lecture(95, "SAS", "PS", "A4"),
+        # Lecture(96, "UMM", "DE", "A4"),
+        
 ]
 
     
