@@ -18,13 +18,21 @@ room_lectures = ["DE", "PS"]
 
 def diffisZero(lesson1: Lecture, lesson2: Lecture):
     between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
-    return timedelta(minutes=0) == between
+    between2 = datetime.combine(today, lesson2.timeslot.end_time) - datetime.combine(today, lesson1.timeslot.start_time)
+    
+    return (timedelta(minutes=0) == between) or (timedelta(minutes=0) == between2)
 
 def classAfterBreak(lesson1: Lecture, lesson2: Lecture):
     between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
     if between.days<0:
         between = abs(between)
     return timedelta(minutes=45) == between <= timedelta(minutes=105)
+
+def classJustAfterBreak(lesson1: Lecture, lesson2: Lecture):
+    between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
+    if between.days<0:
+        between = abs(between)
+    return timedelta(minutes=45) == between
 
 def isOverlapping(l1: Lecture, l2: Lecture):
     return l1.id!=l2.id and l1.teacher==l2.teacher and l1.subject==l2.subject and l1.division==l2.division \
@@ -72,17 +80,26 @@ def four_lectures_per_day(constraint_factory: ConstraintFactory):
     )
 
 # Try to have consecutive classes of same subject
-def same_classes_together(constraint_factory: ConstraintFactory):
+def same_rooms_together(constraint_factory: ConstraintFactory):
     a = constraint_factory. \
-        for_each(LectureClass). \
-            join(LectureClass, 
+            for_each_unique_pair(LectureClass, 
                     Joiners.equal(lambda l: l.division),
                     Joiners.equal(lambda l: l.timeslot.day_of_week),
-                    Joiners.less_than(lambda l: l.id),
-                    Joiners.filtering(lambda a, b: diffisZero(a,b) and a.subject==b.subject)
-
+                    Joiners.filtering(lambda a, b: diffisZero(a,b) and (a.room!=b.room 
+                                                                        ))
                  ) \
-                     .reward("same classes together", HardSoftScore.ofSoft(3))
+                     .penalize("same rooms together", HardSoftScore.ONE_SOFT)
+    return a
+
+def same_subjects_together(constraint_factory: ConstraintFactory):
+    a = constraint_factory. \
+            for_each_unique_pair(LectureClass, 
+                    Joiners.equal(lambda l: l.division),
+                    Joiners.equal(lambda l: l.timeslot.day_of_week),
+                    Joiners.filtering(lambda a, b: diffisZero(a,b) and (a.subject!=b.subject 
+                                                                        ))
+                 ) \
+                     .penalize("same subjects together", HardSoftScore.ONE_SOFT)
     return a
 
 # After the break, classes should be different
@@ -133,6 +150,15 @@ def cant_have_more_than_2_lectures(constraint_factory: ConstraintFactory):
                 penalize("cant have more than two lectures", HardSoftScore.ONE_HARD)
     return a
 
+def same_labs_throughout(constraint_factory: ConstraintFactory):
+    a = constraint_factory.for_each(LectureClass).\
+        group_by(lambda l1: (l1.room, l1.division), ConstraintCollectors.count()).\
+            filter(lambda key,cnt: key[0].name.startswith("Lab")).\
+                group_by(lambda key,cnt: key[1], ConstraintCollectors.count_bi()).\
+                    filter(lambda x,cnt: cnt>1).\
+                        penalize("labs of divisions should remain same", HardSoftScore.ONE_HARD)
+    return a
+
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory):
     return [
@@ -140,11 +166,13 @@ def define_constraints(constraint_factory: ConstraintFactory):
         class_conflict(constraint_factory),
         teacher_conflict(constraint_factory),
         four_lectures_per_day(constraint_factory),
-        same_classes_together(constraint_factory),
+        same_rooms_together(constraint_factory),
+        same_subjects_together(constraint_factory),
         lab_and_room(constraint_factory),
         teachers_prefer_less_lectures(constraint_factory),
         lecture_lab_room_conflict(constraint_factory),
         remove_overlapping_lectures(constraint_factory),
         cant_have_more_than_2_lectures(constraint_factory),
+        same_labs_throughout(constraint_factory),
     ]
     

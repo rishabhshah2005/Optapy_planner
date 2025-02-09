@@ -140,7 +140,7 @@ class TimeTable:
             f"timeslot_list={format_list(self.timeslot_list)},\n"
             f"lecture_list={format_list(self.lecture_list)},\n"
             f"score={str(self.score.toString()) if self.score is not None else 'None'}"
-            f")"
+            f")"  
         )      
     
 
@@ -185,9 +185,9 @@ def generate_problem():
         Room(1,"Room 1"),
         Room(2,"Room 2"),
         # Room(3,"Room 3"),
-        # Room(4,"Lab 1"),
+        Room(4,"Lab 1"),
         Room(5,"Lab 2"),
-        Room(6,"Lab 3"),
+        # Room(6,"Lab 3"),
         # Room(7,"Room 4"),
         # Room(8,"Lab 4"),
     ]
