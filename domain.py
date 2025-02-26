@@ -1,4 +1,4 @@
-#!C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
+#! C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
 from optapy import planning_entity, planning_variable
 from optapy import problem_fact, planning_id
 
@@ -7,21 +7,6 @@ from optapy import planning_solution, planning_entity_collection_property,proble
 from optapy.score import HardSoftScore
 from datetime import time
 
-
-# @problem_fact
-# class Division:
-#     def __init__(self, id, div):
-#         self.div=div
-#         self.id=id
-        
-#     @planning_id
-#     def get_id(self):
-#         return self.id
-    
-#     def __str__(self):
-#         return f"Division(id={self.id}, div={self.div})"
-        
-    
 
 @problem_fact
 class Timeslot:
@@ -60,15 +45,33 @@ class Room:
                 f"room_name={self.name})"
         )
  
+@problem_fact
+class Teacher:
+    def __init__(self, id, name, subject):
+        self.id = id
+        self.name = name
+        self.subject = subject
+    
+    @planning_id
+    def get_id(self):
+        return self.id
+    def __str__(self):
+        return (
+                f"Teacher("
+                f"id={self.id}, "
+                f"name={self.name},"
+                f"subject={self.subject})"
+        )
+ 
 @planning_entity
 class Lecture:
-    def __init__(self, id, teacher, subject,division,room=None, timeslot=None):
+    def __init__(self, id, division, subject ,teacher=None, room=None, timeslot=None):
         self.id = id
         self.room = room
         self.teacher = teacher
-        self.subject = subject
         self.timeslot = timeslot
         self.division = division
+        self.subject = subject
         
     @planning_id
     def get_id(self):
@@ -87,8 +90,13 @@ class Lecture:
     
     def set_room(self, new_room):
         self.room = new_room
-        
-        
+    
+    @planning_variable(Teacher, ['teacherRange'])    
+    def get_teacher(self):
+        return self.teacher
+    
+    def set_teacher(self, new_teacher):
+        self.teacher = new_teacher
         
     def __str__(self):
         return (
@@ -97,8 +105,8 @@ class Lecture:
             f"timeslot={self.timeslot}, "
             f"room={self.room}, "
             f"teacher={self.teacher}, "
+            f"divison={self.division}, "
             f"subject={self.subject}, "
-            f"divison={self.division}"
             f")"
         )
 
@@ -107,10 +115,11 @@ def format_list(a_list):
 
 @planning_solution
 class TimeTable:
-    def __init__(self, timeslot_list, lecture_list,room_list, score=None):
+    def __init__(self, timeslot_list, lecture_list,room_list,teacher_list, score=None):
         self.timeslot_list = timeslot_list
         self.lecture_list = lecture_list
         self.room_list = room_list
+        self.teacher_list = teacher_list
         self.score = score
         
     @problem_fact_collection_property(Timeslot)
@@ -122,6 +131,11 @@ class TimeTable:
     @value_range_provider("roomRange")
     def get_room_list(self):
         return self.room_list
+    
+    @problem_fact_collection_property(Teacher)
+    @value_range_provider("teacherRange")
+    def get_teacher_list(self):
+        return self.teacher_list
     
     @planning_entity_collection_property(Lecture)
     def get_lecture_list(self):
@@ -142,7 +156,18 @@ class TimeTable:
             f"score={str(self.score.toString()) if self.score is not None else 'None'}"
             f")"  
         )      
-    
+
+def create_lectures(divs):
+    lst = []
+    cnt=0
+    subs = ["DE", "PS", "FSD", "Python"]
+    for i in range(1, divs+1):
+         for sub in subs:
+             for j in range(6):
+                 lst.append(Lecture(cnt, "A"+str(i), sub))
+                 cnt+=1
+    return lst
+             
 
 def generate_problem():
     
@@ -175,130 +200,42 @@ def generate_problem():
         Timeslot(24, "SATURDAY", time(hour=12, minute=30), time(hour=13, minute=30)),
     ]
     
-    division_list = [
-        "A1",
-        "A2",
-        "A3",
+    # Teacher(self, id, name, subject)
+    teacher_list = [
+        Teacher(1, "UMS", "DE"),
+        Teacher(2, "MVP", "Python"),
+        Teacher(3, "DPB", "FSD"),
+        Teacher(4, "PKS", "PS"),
+        Teacher(5, "PHA", "FSD"),
+        Teacher(6, "AAP", "Python"),
+        Teacher(7, "SAS", "PS"),
+        Teacher(8, "UMM", "DE"),
+        Teacher(9, "ZVB", "DE"),
+        Teacher(10, "KMS", "Python"),
+        Teacher(11, "DVP", "Python"),
+        Teacher(12, "PBZ", "FSD"),
+        Teacher(13, "SAS", "FSD"),
+        Teacher(14, "MGV", "PS"),
     ]
     
     room_list = [
         Room(1,"Room 1"),
         Room(2,"Room 2"),
-        # Room(3,"Room 3"),
+        Room(3,"Room 3"),
         Room(4,"Lab 1"),
         Room(5,"Lab 2"),
-        # Room(6,"Lab 3"),
-        # Room(7,"Room 4"),
-        # Room(8,"Lab 4"),
+        Room(6,"Lab 3"),
+        Room(7,"Room 4"),
+        Room(8,"Lab 4"),
+        Room(9,"Lab 5"),
+        Room(10,"Room 5"),
     ]
-    # LECTURE(self, id, teacher, subject,division,room=None, timeslot=None)
-    lecture_list = [
-        Lecture(1, "DPB", "FSD", "A1"),
-        Lecture(2, "MVP", "Python", "A1"),
-        Lecture(3, "PKS", "PS", "A1"),
-        Lecture(4, "UMS", "DE", "A1"),
-        Lecture(5, "DPB", "FSD", "A1"),
-        Lecture(6, "MVP", "Python", "A1"),
-        Lecture(7, "PKS", "PS", "A1"),
-        Lecture(8, "UMS", "DE", "A1"),
-        Lecture(9, "DPB", "FSD", "A1"),
-        Lecture(10, "MVP", "Python", "A1"),
-        Lecture(11, "PKS", "PS", "A1"),
-        Lecture(12, "UMS", "DE", "A1"),
-        Lecture(13, "DPB", "FSD", "A1"),
-        Lecture(14, "MVP", "Python", "A1"),
-        Lecture(15, "PKS", "PS", "A1"),
-        Lecture(16, "UMS", "DE", "A1"),
-        Lecture(17, "DPB", "FSD", "A1"),
-        Lecture(18, "MVP", "Python", "A1"),
-        Lecture(19, "PKS", "PS", "A1"),
-        Lecture(20, "UMS", "DE", "A1"),
-        Lecture(21, "DPB", "FSD", "A1"),
-        Lecture(22, "MVP", "Python", "A1"),
-        Lecture(23, "PKS", "PS", "A1"),
-        Lecture(24, "UMS", "DE", "A1"),
-        
-        Lecture(25, "DPB", "FSD", "A2"),
-        Lecture(26, "MVP", "Python", "A2"),
-        Lecture(27, "PKS", "PS", "A2"),
-        Lecture(28, "UMS", "DE", "A2"),
-        Lecture(29, "DPB", "FSD", "A2"),
-        Lecture(30, "MVP", "Python", "A2"),
-        Lecture(31, "PKS", "PS", "A2"),
-        Lecture(32, "UMS", "DE", "A2"),
-        Lecture(33, "DPB", "FSD", "A2"),
-        Lecture(34, "MVP", "Python", "A2"),
-        Lecture(35, "PKS", "PS", "A2"),
-        Lecture(36, "UMS", "DE", "A2"),
-        Lecture(37, "DPB", "FSD", "A2"),
-        Lecture(38, "MVP", "Python", "A2"),
-        Lecture(39, "PKS", "PS", "A2"),
-        Lecture(40, "UMS", "DE", "A2"),
-        Lecture(41, "DPB", "FSD", "A2"),
-        Lecture(42, "MVP", "Python", "A2"),
-        Lecture(43, "PKS", "PS", "A2"),
-        Lecture(44, "UMS", "DE", "A2"),
-        Lecture(45, "DPB", "FSD", "A2"),
-        Lecture(46, "MVP", "Python", "A2"),
-        Lecture(47, "PKS", "PS", "A2"),
-        Lecture(48, "UMS", "DE", "A2"),
-        
-        Lecture(49, "DPB", "FSD", "A3"),
-        Lecture(50, "MVP", "Python", "A3"),
-        Lecture(51, "PKS", "PS", "A3"),
-        Lecture(52, "UMS", "DE", "A3"),
-        Lecture(53, "DPB", "FSD", "A3"),
-        Lecture(54, "MVP", "Python", "A3"),
-        Lecture(55, "PKS", "PS", "A3"),
-        Lecture(56, "UMS", "DE", "A3"),
-        Lecture(57, "DPB", "FSD", "A3"),
-        Lecture(58, "MVP", "Python", "A3"),
-        Lecture(59, "PKS", "PS", "A3"),
-        Lecture(60, "UMS", "DE", "A3"),
-        Lecture(61, "DPB", "FSD", "A3"),
-        Lecture(62, "MVP", "Python", "A3"),
-        Lecture(63, "PKS", "PS", "A3"),
-        Lecture(64, "UMS", "DE", "A3"),
-        Lecture(65, "DPB", "FSD", "A3"),
-        Lecture(66, "MVP", "Python", "A3"),
-        Lecture(67, "PKS", "PS", "A3"),
-        Lecture(68, "UMS", "DE", "A3"),
-        Lecture(69, "DPB", "FSD", "A3"),
-        Lecture(70, "MVP", "Python", "A3"),
-        Lecture(71, "PKS", "PS", "A3"),
-        Lecture(72, "UMS", "DE", "A3"),
-        
-        # Lecture(73, "PHA", "FSD", "A4"),
-        # Lecture(74, "AAP", "Python", "A4"),
-        # Lecture(75, "SAS", "PS", "A4"),
-        # Lecture(76, "UMM", "DE", "A4"),
-        # Lecture(77, "PHA", "FSD", "A4"),
-        # Lecture(78, "AAP", "Python", "A4"),
-        # Lecture(79, "SAS", "PS", "A4"),
-        # Lecture(80, "UMM", "DE", "A4"),
-        # Lecture(81, "PHA", "FSD", "A4"),
-        # Lecture(82, "AAP", "Python", "A4"),
-        # Lecture(83, "SAS", "PS", "A4"),
-        # Lecture(84, "UMM", "DE", "A4"),
-        # Lecture(85, "PHA", "FSD", "A4"),
-        # Lecture(86, "AAP", "Python", "A4"),
-        # Lecture(87, "SAS", "PS", "A4"),
-        # Lecture(88, "UMM", "DE", "A4"),
-        # Lecture(89, "PHA", "FSD", "A4"),
-        # Lecture(90, "AAP", "Python", "A4"),
-        # Lecture(91, "SAS", "PS", "A4"),
-        # Lecture(92, "UMM", "DE", "A4"),
-        # Lecture(93, "PHA", "FSD", "A4"),
-        # Lecture(94, "AAP", "Python", "A4"),
-        # Lecture(95, "SAS", "PS", "A4"),
-        # Lecture(96, "UMM", "DE", "A4"),
-        
-]
-
+    # LECTURE(id, division, subject ,teacher=None, room=None, timeslot=None)
+    lecture_list = create_lectures(9)
     
-    
-    lesson = lecture_list[0]
+    lesson: Lecture = lecture_list[0]
     lesson.set_timeslot(timeslot_list[0])
     lesson.set_room(room_list[0])
+    lesson.set_teacher(teacher_list[0])
 
-    return TimeTable(timeslot_list, lecture_list, room_list)
+    return TimeTable(timeslot_list, lecture_list, room_list, teacher_list)
