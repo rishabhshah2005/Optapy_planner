@@ -46,7 +46,7 @@ def room_conflict(constraint_factory: ConstraintFactory):
                         Joiners.equal(lambda l1: l1.room),
                         Joiners.equal(lambda l1: l1.timeslot),
                              ) \
-                 .penalize("room conflict", HardSoftScore.ofHard(2))
+                 .penalize("room conflict", HardSoftScore.ofHard(1))
     return a
 
 def teacher_conflict(constraint_factory: ConstraintFactory):
@@ -56,7 +56,7 @@ def teacher_conflict(constraint_factory: ConstraintFactory):
                 Joiners.equal(lambda l1: l1.teacher),
                 Joiners.equal(lambda l1: l1.timeslot),
                 )\
-                .penalize("teacher conflict", HardSoftScore.ofHard(2))
+                .penalize("teacher conflict", HardSoftScore.ofHard(1))
     return a
 
 # Division conflict
@@ -67,13 +67,13 @@ def class_conflict(constraint_factory: ConstraintFactory):
                              Joiners.equal(lambda l1: l1.division),
                              Joiners.equal(lambda l1: l1.timeslot)
                              )\
-                 .penalize("class conflict", HardSoftScore.ofHard(2))
+                 .penalize("class conflict", HardSoftScore.ofHard(1))
     return a
 
 def subject_conflict(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each(LectureClass).\
         filter(lambda l1: l1.subject != l1.teacher.subject).\
-            penalize("Teachers should be assigned there resp subjects", HardSoftScore.ofHard(2))
+            penalize("Teachers should be assigned there resp subjects", HardSoftScore.ofHard(1))
             
     return a
 
@@ -153,7 +153,7 @@ def cant_have_more_than_2_lectures(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each(LectureClass).\
         group_by(lambda l1: (l1.timeslot.day_of_week, l1.subject, l1.division), ConstraintCollectors.count()).\
             filter(lambda key,cnt: cnt>2).\
-                penalize("cant have more than two lectures", HardSoftScore.ofHard(2))
+                penalize("cant have more than two lectures", HardSoftScore.ofHard(1))
     return a
 
 def same_labs_throughout(constraint_factory: ConstraintFactory):
@@ -178,15 +178,22 @@ def students_constant_teachers(constraint_factory: ConstraintFactory):
         group_by(lambda l1: (l1.division, l1.teacher)).\
             group_by(lambda l1: l1[0] ,ConstraintCollectors.count()).\
                 filter(lambda grp, cnt: cnt>4).\
-                    penalize("students should have the same teachers", HardSoftScore.ofHard(3))
+                    penalize("students should have the same teachers", HardSoftScore.ofHard(2))
     return a
 
-def only_two_labs_room_per_day(constraint_factory: ConstraintFactory):
+def only_two_labs_per_day(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each(LectureClass).\
-        group_by(lambda l1: (l1.timeslot.day_of_week, l1.division, l1.room.name.startswith("Lab"))).\
-            group_by(lambda grp: (grp[0], grp[1]), ConstraintCollectors.count()).\
-                filter(lambda grp, cnt: cnt<2).\
-                    penalize("Cant have more than 2 labs per day", HardSoftScore.ONE_SOFT)
+        group_by(lambda l1: (l1.timeslot.day_of_week, l1.division, l1.room.name.startswith("Lab")), ConstraintCollectors.count()).\
+                filter(lambda grp, cnt: grp[2] and cnt>2).\
+                    penalize("Cant have more than 2 labs per day", HardSoftScore.ONE_HARD)
+
+    return a
+
+def only_two_rooms_per_day(constraint_factory: ConstraintFactory):
+    a = constraint_factory.for_each(LectureClass).\
+        group_by(lambda l1: (l1.timeslot.day_of_week, l1.division, l1.room.name.startswith("Room")), ConstraintCollectors.count()).\
+                filter(lambda grp, cnt: grp[2] and cnt>2).\
+                    penalize("Cant have more than 2 rooms per day", HardSoftScore.ofHard(2))
 
     return a
 
@@ -210,6 +217,7 @@ def define_constraints(constraint_factory: ConstraintFactory):
         same_labs_throughout(constraint_factory),
         teachers_constant_division(constraint_factory), 
         students_constant_teachers(constraint_factory),
-        only_two_labs_room_per_day(constraint_factory),
+        only_two_labs_per_day(constraint_factory),
+        only_two_rooms_per_day(constraint_factory),
     ]
     

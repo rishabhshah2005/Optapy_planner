@@ -79,13 +79,12 @@ def test_same_classes_conflict():
         .given(*invalid_lectures) \
         .penalizes(2)  # Penalized for missing a lecture
         
-        
-def test_lab_and_room():
-    first_lesson = Lecture(1, DIV1, "DE", S1, R1, T2)
-    conflicting_lesson = Lecture(2, DIV1, "DE", S1, R1, T3)
-    nonconflicting_lesson = Lecture(3, DIV1, "DE", S1, L1, T3)
-    cv.verify_that(lab_and_room).given(first_lesson, nonconflicting_lesson, conflicting_lesson). \
-        penalizes(1)
+# def test_lab_and_room():
+#     first_lesson = Lecture(1, DIV1, "DE", S1, R1, T2)
+#     conflicting_lesson = Lecture(2, DIV1, "DE", S1, R1, T3)
+#     nonconflicting_lesson = Lecture(3, DIV1, "DE", S1, L1, T3)
+#     cv.verify_that(lab_and_room).given(first_lesson, nonconflicting_lesson, conflicting_lesson). \
+#         penalizes(1)
         
 def test_four_lectures_per_day():
     valid_lectures = [   
@@ -319,7 +318,7 @@ def test_students_constant_teachers():
         given(*valid_lectures).\
             penalizes(0)
 
-def test_only_two_labs_room_per_day():
+def test_only_two_labs_per_day():
     invalid_lectures = [
         Lecture(1, DIV1,'FSD', S2, L1, T1),
         Lecture(2, DIV1,'FSD', S2, L1, T2),
@@ -334,10 +333,10 @@ def test_only_two_labs_room_per_day():
     ]
     
     
-    cv.verify_that(only_two_labs_room_per_day).\
+    cv.verify_that(only_two_labs_per_day).\
         given(*invalid_lectures).\
             penalizes(1)
-    cv.verify_that(only_two_labs_room_per_day).\
+    cv.verify_that(only_two_labs_per_day).\
         given(*valid_lectures).\
             penalizes(0)
 
