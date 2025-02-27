@@ -78,14 +78,7 @@ def test_same_classes_conflict():
     cv.verify_that(same_rooms_together) \
         .given(*invalid_lectures) \
         .penalizes(2)  # Penalized for missing a lecture
-        
-# def test_lab_and_room():
-#     first_lesson = Lecture(1, DIV1, "DE", S1, R1, T2)
-#     conflicting_lesson = Lecture(2, DIV1, "DE", S1, R1, T3)
-#     nonconflicting_lesson = Lecture(3, DIV1, "DE", S1, L1, T3)
-#     cv.verify_that(lab_and_room).given(first_lesson, nonconflicting_lesson, conflicting_lesson). \
-#         penalizes(1)
-        
+                
 def test_four_lectures_per_day():
     valid_lectures = [   
         Lecture(1, DIV1, "DE", S1, R1, T1),
@@ -106,37 +99,6 @@ def test_four_lectures_per_day():
         .given(*invalid_lectures) \
         .penalizes(1)  # Penalized for missing a lecture
         
-# def test_teachers_prefer_less_lectures():
-#     valid_lectures = [
-#         Lecture(1, DIV1, "DE", S1, R1, T1),
-#         Lecture(2, DIV2, "DE", S1, R2, T2),
-#         Lecture(3, DIV1, "DE", S1, R1, T3),
-#     ]
-#     valid_lectures2 = [
-#         Lecture(1, DIV1, "DE", S1, R1, T1),
-#         Lecture(2, DIV2, "DE", S1, R2, T2),
-#     ]
-#     invalid_lectures = [
-#         Lecture(1, DIV1, "DE", S1, R1, T1),
-#         Lecture(2, DIV2, "DE", S1, R2, T2),
-#         Lecture(3, DIV1, "DE", S1, R1, T3),
-#         Lecture(4, DIV1, "DE", S1, R1, T4),
-#     ]
-
- 
-#     # Verify that the correct cases are rewarded
-#     cv.verify_that(teachers_prefer_less_lectures) \
-#         .given(*valid_lectures) \
-#         .rewards(1)  
-#     cv.verify_that(teachers_prefer_less_lectures) \
-#         .given(*valid_lectures2) \
-#         .rewards(1)  
-
-    # No rewards for 4 lectures
-    # cv.verify_that(teachers_prefer_less_lectures) \
-    #     .given(*invalid_lectures) \
-    #     .rewards(0)  
-
 def test_lecture_lab_room_conflict():
     valid_lectures = [
         Lecture(1, DIV1, "Python", S2, L1, T1),

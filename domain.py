@@ -24,9 +24,9 @@ class Timeslot:
         return (
                 f"Timeslot("
                 f"id={self.id}, "
-                f"day_of_week={self.day_of_week}, "
-                f"start_time={self.start_time}, "
-                f"end_time={self.end_time})"
+                f"day_of_week='{self.day_of_week}', "
+                f"start_time='{self.start_time}', "
+                f"end_time='{self.end_time}')"
         )
 
 @problem_fact
@@ -42,7 +42,7 @@ class Room:
         return (
                 f"Room("
                 f"id={self.id}, "
-                f"room_name={self.name})"
+                f"name='{self.name}')"
         )
  
 @problem_fact
@@ -59,10 +59,10 @@ class Teacher:
         return (
                 f"Teacher("
                 f"id={self.id}, "
-                f"name={self.name},"
-                f"subject={self.subject})"
+                f"name='{self.name}',"
+                f"subject='{self.subject}')"
         )
- 
+
 @planning_entity
 class Lecture:
     def __init__(self, id, division, subject ,teacher=None, room=None, timeslot=None):
@@ -105,8 +105,8 @@ class Lecture:
             f"timeslot={self.timeslot}, "
             f"room={self.room}, "
             f"teacher={self.teacher}, "
-            f"divison={self.division}, "
-            f"subject={self.subject}, "
+            f"division='{self.division}', "
+            f"subject='{self.subject}', "
             f")"
         )
 

@@ -22,22 +22,6 @@ def diffisZero(lesson1: Lecture, lesson2: Lecture):
     
     return (timedelta(minutes=0) == between) or (timedelta(minutes=0) == between2)
 
-def classAfterBreak(lesson1: Lecture, lesson2: Lecture):
-    between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
-    if between.days<0:
-        between = abs(between)
-    return timedelta(minutes=45) == between <= timedelta(minutes=105)
-
-def classJustAfterBreak(lesson1: Lecture, lesson2: Lecture):
-    between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
-    if between.days<0:
-        between = abs(between)
-    return timedelta(minutes=45) == between
-
-def isOverlapping(l1: Lecture, l2: Lecture):
-    return l1.id!=l2.id and l1.teacher==l2.teacher and l1.division==l2.division \
-            and l1.room==l2.room and l1.timeslot==l2.timeslot and l1.subject==l2.subject
-
 # Rooms should not be same
 def room_conflict(constraint_factory: ConstraintFactory):
     # LECTURE(self, id, teacher, subject,division,room=None, timeslot=None)
@@ -118,28 +102,6 @@ def same_subjects_together(constraint_factory: ConstraintFactory):
                      .penalize("same subjects together", HardSoftScore.ONE_SOFT)
     return a
 
-# After the break, classes should be different
-def lab_and_room(constraint_factory: ConstraintFactory):
-    a = constraint_factory. \
-        for_each(LectureClass). \
-            join(LectureClass, 
-                    Joiners.equal(lambda l: l.division),
-                    Joiners.equal(lambda l: l.timeslot.day_of_week),
-                    Joiners.filtering(lambda a, b: classAfterBreak(a,b) and (a.room.name.split(" ")[0]==b.room.name.split(" ")[0]))
-                 ) \
-                     .penalize("classes after break are different", HardSoftScore.ofSoft(2))
-    return a
-
-# A ConstraintCollecter.func takes a function and returns a collector
-    
-def teachers_prefer_less_lectures(constraint_factory: ConstraintFactory):
-    a = constraint_factory.for_each(LectureClass). \
-        group_by(lambda lecture: (lecture.teacher, lecture.timeslot.day_of_week), ConstraintCollectors.count()). \
-            filter(lambda lecture, cnt: cnt<4). \
-                reward("less lectures are preferred by teachers", HardSoftScore.ofSoft(1))
-    return a
-
-
 def remove_overlapping_lectures(constraint_factory: ConstraintFactory):
     a = constraint_factory.for_each_unique_pair(LectureClass,
                     Joiners.equal(lambda l1: l1.teacher),
@@ -209,8 +171,6 @@ def define_constraints(constraint_factory: ConstraintFactory):
         four_lectures_per_day(constraint_factory), # Hard
         same_rooms_together(constraint_factory),
         same_subjects_together(constraint_factory),
-        # lab_and_room(constraint_factory),
-        # teachers_prefer_less_lectures(constraint_factory),
         lecture_lab_room_conflict(constraint_factory), # Hard
         remove_overlapping_lectures(constraint_factory), # Hard
         cant_have_more_than_2_lectures(constraint_factory),
