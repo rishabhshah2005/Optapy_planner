@@ -1,4 +1,4 @@
-#!C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
+# <add python path if required>
 from domain import Lecture, Room
 from optapy import constraint_provider, get_class
 from optapy.constraint import Joiners

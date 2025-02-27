@@ -1,4 +1,4 @@
-#!C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
+# <add python path if required>
 
 from domain import Lecture, TimeTable, generate_problem
 from constraints import define_constraints

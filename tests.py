@@ -1,4 +1,4 @@
-#!C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
+# <add python path if required>
 from domain import Lecture, Timeslot, TimeTable, Room, Teacher
 from constraints import *
 from datetime import time
@@ -301,5 +301,3 @@ def test_only_two_labs_per_day():
     cv.verify_that(only_two_labs_per_day).\
         given(*valid_lectures).\
             penalizes(0)
-
-# C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe -m pytest tests.py

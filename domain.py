@@ -1,4 +1,4 @@
-#! C:\Users\Chirag\AppData\Local\Programs\Python\Python310\python.exe
+# <add python path if required>
 from optapy import planning_entity, planning_variable
 from optapy import problem_fact, planning_id
 
