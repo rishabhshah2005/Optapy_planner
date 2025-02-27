@@ -13,8 +13,21 @@ RoomClass = get_class(Room)
 
 today = date.today()
 
-lab_lectures=["FSD", "Python"]
-room_lectures = ["DE", "PS"]
+
+def generate_subject_room(room: str):
+    lst= []
+    with open("input/subjects.txt", "r") as f:
+        lines = f.readlines()
+    
+    for sub in lines:
+        sub = sub.strip().split(" ")
+        if sub[1]==room:
+            lst.append(sub[0])
+    
+    return lst
+
+lab_lectures = generate_subject_room("Lab")
+room_lectures = generate_subject_room("Room")
 
 def diffisZero(lesson1: Lecture, lesson2: Lecture):
     between = datetime.combine(today, lesson1.timeslot.end_time) - datetime.combine(today, lesson2.timeslot.start_time)
@@ -76,7 +89,6 @@ def lecture_lab_room_conflict(constraint_factory: ConstraintFactory):
         filter(lambda l1: (l1.room.name.startswith("Lab") and (l1.subject not in lab_lectures)) or
                       (l1.room.name.startswith("Room") and (l1.subject not in room_lectures))).\
                 penalize("lab lab room room", HardSoftScore.ofHard(2))
-    
     return a
 
 # Try to have consecutive classes of same subject
@@ -158,7 +170,6 @@ def only_two_rooms_per_day(constraint_factory: ConstraintFactory):
                     penalize("Cant have more than 2 rooms per day", HardSoftScore.ofHard(2))
 
     return a
-
 
 
 @constraint_provider

@@ -7,6 +7,45 @@ from optapy import planning_solution, planning_entity_collection_property,proble
 from optapy.score import HardSoftScore
 from datetime import time
 
+def generate_teachers():
+    lst: list[Teacher] = []
+    with open("input/teachers.txt", "r") as f:
+        lines = f.readlines()
+    
+    cnt=1
+    for teacher in lines:
+        teacher = teacher.strip().split(" ")
+        # Teacher(self, id, name, subject)
+        lst.append(Teacher(id=cnt, name=teacher[0], subject=teacher[1]))
+        cnt+=1
+    
+    return lst
+
+def generate_rooms():
+    lst: list[Room] = []
+    with open("input/rooms.txt", "r") as f:
+        lines = f.readlines()
+    
+    cnt=1
+    for room in lines:
+        room = room.strip()
+        # Room(id, name)
+        lst.append(Room(id=cnt, name=room))
+        cnt+=1
+    
+    return lst
+
+def generate_subjects():
+    lst= []
+    with open("input/subjects.txt", "r") as f:
+        lines = f.readlines()
+    
+    for sub in lines:
+        sub = sub.strip().split(" ")
+        lst.append(sub[0])
+    
+    return lst
+
 
 @problem_fact
 class Timeslot:
@@ -160,7 +199,11 @@ class TimeTable:
 def create_lectures(divs):
     lst = []
     cnt=0
-    subs = ["DE", "PS", "FSD", "Python"]
+    # subs = ["DE", "PS", "FSD", "Python"] # This one Works
+    # subs = ['PS', 'DE', 'Python', 'FSD'] # This doesn't
+    # subs = ['A', 'B', 'C', 'D'] # This doesn't
+    subs = generate_subjects()
+    subs = sorted(subs, key=lambda s: (len(s), -ord(s[0])), reverse=False)
     for i in range(1, divs+1):
          for sub in subs:
              for j in range(6):
@@ -201,41 +244,16 @@ def generate_problem():
     ]
     
     # Teacher(self, id, name, subject)
-    teacher_list = [
-        Teacher(1, "UMS", "DE"),
-        Teacher(2, "MVP", "Python"),
-        Teacher(3, "DPB", "FSD"),
-        Teacher(4, "PKS", "PS"),
-        Teacher(5, "PHA", "FSD"),
-        Teacher(6, "AAP", "Python"),
-        Teacher(7, "SAS", "PS"),
-        Teacher(8, "UMM", "DE"),
-        Teacher(9, "ZVB", "DE"),
-        Teacher(10, "KMS", "Python"),
-        Teacher(11, "DVP", "Python"),
-        Teacher(12, "PBZ", "FSD"),
-        Teacher(13, "SAS", "FSD"),
-        Teacher(14, "MGV", "PS"),
-    ]
+
+    teacher_list = generate_teachers()
     
-    room_list = [
-        Room(1,"Room 1"),
-        Room(2,"Room 2"),
-        Room(3,"Room 3"),
-        Room(4,"Lab 1"),
-        Room(5,"Lab 2"),
-        Room(6,"Lab 3"),
-        Room(7,"Room 4"),
-        Room(8,"Lab 4"),
-        Room(9,"Lab 5"),
-        Room(10,"Room 5"),
-    ]
+    room_list = generate_rooms()
     # LECTURE(id, division, subject ,teacher=None, room=None, timeslot=None)
     lecture_list = create_lectures(9)
     
-    lesson: Lecture = lecture_list[0]
-    lesson.set_timeslot(timeslot_list[0])
-    lesson.set_room(room_list[0])
-    lesson.set_teacher(teacher_list[0])
+    # lesson: Lecture = lecture_list[0]
+    # lesson.set_timeslot(timeslot_list[0])
+    # lesson.set_room(room_list[0])
+    # lesson.set_teacher(teacher_list[0])
 
     return TimeTable(timeslot_list, lecture_list, room_list, teacher_list)
